@@ -29,6 +29,7 @@ http.interceptors.request.use(
 http.interceptors.response.use(
   (response) => {
     const payload = response.data
+    const silent = !!(response.config && response.config.silent)
     if (payload && typeof payload === 'object' && 'code' in payload) {
       if (payload.code === 200) {
         return payload.data
@@ -39,18 +40,19 @@ http.interceptors.response.use(
         store.dispatch('app/UpdateUserInfo', {})
         store.dispatch('app/UpdateLoginVisible', true)
       }
-      Message.error(msg)
+      if (!silent) Message.error(msg)
       return Promise.reject(new Error(msg))
     }
     return payload
   },
   (error) => {
     const data = error.response && error.response.data
+    const silent = !!(error.config && error.config.silent)
     const msg =
       (data && (data.msg || data.message)) ||
       error.message ||
       '网络异常，请稍后重试'
-    Message.error(msg)
+    if (!silent) Message.error(msg)
     return Promise.reject(error)
   }
 )
