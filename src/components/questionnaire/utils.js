@@ -70,7 +70,8 @@ export const createQuestion = (type) => {
   if (type === QUESTION_TYPES.UPLOAD) {
     return {
       ...base,
-      placeholder: ''
+      placeholder: '',
+      uploadLimit: 9
     }
   }
   return base

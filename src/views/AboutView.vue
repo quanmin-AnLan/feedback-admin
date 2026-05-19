@@ -4,7 +4,7 @@
       <div slot="header">
         <span>关于</span>
       </div>
-      <p>Vue 2.7 + Element UI + Vuex + Vue Router + Axios</p>
+      <p>Vue 2.7 + Element UI + Vue Router + Axios</p>
       <p class="hint">
         可在项目根目录创建 <code>.env.development</code>，设置
         <code>VUE_APP_API_BASE_URL</code> 指向真实后端地址。

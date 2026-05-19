@@ -1,18 +1,16 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import createPersistedState from 'vuex-persistedstate'
+import app from './modules/app'
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-  state: {
-    appName: 'Feedback Admin'
-  },
-  getters: {},
-  mutations: {
-    SET_APP_NAME(state, name) {
-      state.appName = name
-    }
-  },
-  actions: {},
-  modules: {}
+  modules: { app },
+  plugins: [
+    createPersistedState({
+      key: 'feedback-admin',
+      storage: window.localStorage
+    })
+  ]
 })

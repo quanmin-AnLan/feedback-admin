@@ -3,9 +3,22 @@
     <el-card shadow="never">
       <div slot="header" class="home__header">
         <span class="home__title">问卷列表</span>
-        <el-button type="warning" icon="el-icon-plus" @click="onCreate">
-          新建问卷
-        </el-button>
+        <el-tooltip
+          :content="`需要 level ≥ ${writeLevel} 的账号`"
+          :disabled="canEdit"
+          placement="bottom"
+        >
+          <span>
+            <el-button
+              type="warning"
+              icon="el-icon-plus"
+              :disabled="!canEdit"
+              @click="onCreate"
+            >
+              新建问卷
+            </el-button>
+          </span>
+        </el-tooltip>
       </div>
 
       <el-table
@@ -21,10 +34,21 @@
           width="280"
         />
         <el-table-column prop="title" label="问卷标题" show-overflow-tooltip />
-        <el-table-column label="操作" width="160" align="center">
+        <el-table-column label="操作" width="200" align="center">
           <template #default="{ row }">
-            <el-button type="text" @click="onEdit(row)">编辑</el-button>
-            <el-button type="text" class="home__danger" @click="onDelete(row)">
+            <el-button
+              type="text"
+              :disabled="!canEdit"
+              @click="onEdit(row)"
+            >
+              编辑
+            </el-button>
+            <el-button
+              type="text"
+              class="home__danger"
+              :disabled="!canEdit"
+              @click="onDelete(row)"
+            >
               删除
             </el-button>
           </template>
@@ -36,13 +60,20 @@
 
 <script>
 import questionnaireApi from '@/api/questionnaire'
+import { WRITE_LEVEL } from '@/store/modules/app'
 
 export default {
   name: 'HomeView',
   data() {
     return {
       loading: false,
-      list: []
+      list: [],
+      writeLevel: WRITE_LEVEL
+    }
+  },
+  computed: {
+    canEdit() {
+      return this.$store.getters['app/canEdit']
     }
   },
   created() {

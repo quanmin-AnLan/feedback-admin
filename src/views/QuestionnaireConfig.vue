@@ -7,6 +7,7 @@
         v-for="btn in addButtons"
         :key="btn.type"
         type="warning"
+        :disabled="!canEdit"
         class="q-config__add-btn"
         @click="addQuestion(btn.type)"
       >
@@ -19,6 +20,10 @@
       <el-card shadow="never" class="q-config__card">
         <div slot="header" class="q-config__header">
           {{ isEdit ? '编辑问卷' : '配置问卷卡' }}
+        </div>
+
+        <div v-if="!canEdit" class="q-config__perm-tip">
+          当前账号 level 不足 {{ writeLevel }}，仅可浏览，无法保存
         </div>
 
         <!-- 问卷基础信息 -->
@@ -98,13 +103,22 @@
         <!-- 底部操作 -->
         <div class="q-config__actions">
           <el-button @click="handleCancel">取消</el-button>
-          <el-button
-            type="warning"
-            :loading="submitting"
-            @click="handleSubmit"
+          <el-tooltip
+            :content="`需要 level ≥ ${writeLevel} 的账号`"
+            :disabled="canEdit"
+            placement="top"
           >
-            {{ isEdit ? '保存' : '提交' }}
-          </el-button>
+            <span>
+              <el-button
+                type="warning"
+                :loading="submitting"
+                :disabled="!canEdit"
+                @click="handleSubmit"
+              >
+                {{ isEdit ? '保存' : '提交' }}
+              </el-button>
+            </span>
+          </el-tooltip>
         </div>
       </el-card>
     </section>
@@ -120,6 +134,7 @@ import TextareaQuestion from '@/components/questionnaire/TextareaQuestion.vue'
 import UploadQuestion from '@/components/questionnaire/UploadQuestion.vue'
 import { createQuestion, QUESTION_TYPES } from '@/components/questionnaire/utils'
 import questionnaireApi from '@/api/questionnaire'
+import { WRITE_LEVEL } from '@/store/modules/app'
 
 const createEmptyForm = () => ({
   title: '',
@@ -171,6 +186,12 @@ export default {
   computed: {
     isEdit() {
       return !!this.questionnaireId
+    },
+    canEdit() {
+      return this.$store.getters['app/canEdit']
+    },
+    writeLevel() {
+      return WRITE_LEVEL
     }
   },
   created() {
@@ -211,16 +232,41 @@ export default {
         .then(() => {
           const removed = this.form.questions[idx]
           this.form.questions.splice(idx, 1)
-          // 同步清理其他题目对它的关联
-          if (removed) {
-            this.form.questions = this.form.questions.map((q) =>
-              q.linkedQuestionId === removed.questionId
-                ? { ...q, linkedQuestionId: null, linkedOptionId: null }
-                : q
-            )
-          }
+          if (!removed) return
+          // 关联到被删题目的，重置 relation
+          this.form.questions = this.form.questions.map((q) => {
+            const dep = q.relation && q.relation.dependOnQuestionId
+            if (dep && dep === removed.id) {
+              return {
+                ...q,
+                relation: {
+                  enabled: false,
+                  dependOnQuestionId: null,
+                  showWhenOptionsSelected: []
+                }
+              }
+            }
+            return q
+          })
         })
         .catch(() => {})
+    },
+    onOptionRemoved(removedValue) {
+      // 子题删除了某个选项后，清理其他题对该选项 value 的关联引用
+      this.form.questions = this.form.questions.map((q) => {
+        const sel =
+          q.relation && Array.isArray(q.relation.showWhenOptionsSelected)
+            ? q.relation.showWhenOptionsSelected
+            : null
+        if (!sel || !sel.includes(removedValue)) return q
+        return {
+          ...q,
+          relation: {
+            ...q.relation,
+            showWhenOptionsSelected: sel.filter((v) => v !== removedValue)
+          }
+        }
+      })
     },
     handleCancel() {
       this.$confirm('确认放弃当前配置？', '提示', { type: 'warning' })
@@ -230,6 +276,10 @@ export default {
         .catch(() => {})
     },
     async handleSubmit() {
+      if (!this.canEdit) {
+        this.$message.warning(`权限不足：需要 level ≥ ${this.writeLevel} 的账号`)
+        return
+      }
       if (!this.form.title.trim()) {
         this.$message.warning('请填写问卷标题')
         return
@@ -326,6 +376,16 @@ export default {
   font-size: 16px;
   font-weight: 600;
   color: #303133;
+}
+
+.q-config__perm-tip {
+  margin: 12px 0 16px;
+  padding: 10px 14px;
+  background: #fdf6ec;
+  border-left: 4px solid #e6a23c;
+  color: #b88230;
+  font-size: 13px;
+  border-radius: 4px;
 }
 
 .q-config__form {

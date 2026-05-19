@@ -23,6 +23,18 @@
           @input="updateField('placeholder', $event)"
         />
       </div>
+      <div class="upload-q__settings-item upload-q__settings-item--inline">
+        <span class="upload-q__label">最多上传张数</span>
+        <el-input-number
+          :value="value.uploadLimit"
+          size="small"
+          :min="1"
+          :max="99"
+          :step="1"
+          controls-position="right"
+          @change="updateField('uploadLimit', $event)"
+        />
+      </div>
     </div>
   </question-item>
 </template>
@@ -82,6 +94,10 @@ export default {
 .upload-q__settings-item {
   display: flex;
   gap: 12px;
+}
+
+.upload-q__settings-item--inline {
+  align-items: center;
 }
 
 .upload-q__label {
