@@ -27,6 +27,9 @@ export const apiQuestionnaire = {
   listAnswers(questionnaireId, params) {
     return http.get(`/questionnaire/${questionnaireId}/answers`, { params })
   },
+  getStatistics(questionnaireId) {
+    return http.get(`/questionnaire/${questionnaireId}/statistics`)
+  },
   /** 获取默认题型配置，data 为 string[] */
   getDefaultConfig() {
     return http.get('/questionnaire/defaultConfig')

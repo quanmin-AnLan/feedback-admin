@@ -61,6 +61,20 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/questionnaire/:questionnaireId/answers',
+    name: 'questionnaire-answers',
+    component: () => import('../views/QuestionnaireAnswers.vue'),
+    props: true,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/questionnaire/:questionnaireId/statistics',
+    name: 'questionnaire-statistics',
+    component: () => import('../views/QuestionnaireStatistics.vue'),
+    props: true,
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/about',
     name: 'about',
     component: () => import('../views/AboutView.vue')

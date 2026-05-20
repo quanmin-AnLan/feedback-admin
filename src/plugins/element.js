@@ -13,12 +13,14 @@ import Empty from 'element-ui/lib/empty'
 import Form from 'element-ui/lib/form'
 import FormItem from 'element-ui/lib/form-item'
 import Header from 'element-ui/lib/header'
+import Image from 'element-ui/lib/image'
 import Input from 'element-ui/lib/input'
 import InputNumber from 'element-ui/lib/input-number'
 import Main from 'element-ui/lib/main'
 import Menu from 'element-ui/lib/menu'
 import MenuItem from 'element-ui/lib/menu-item'
 import Option from 'element-ui/lib/option'
+import Pagination from 'element-ui/lib/pagination'
 import Radio from 'element-ui/lib/radio'
 import RadioGroup from 'element-ui/lib/radio-group'
 import Select from 'element-ui/lib/select'
@@ -45,12 +47,14 @@ import 'element-ui/lib/theme-chalk/empty.css'
 import 'element-ui/lib/theme-chalk/form.css'
 import 'element-ui/lib/theme-chalk/form-item.css'
 import 'element-ui/lib/theme-chalk/header.css'
+import 'element-ui/lib/theme-chalk/image.css'
 import 'element-ui/lib/theme-chalk/input.css'
 import 'element-ui/lib/theme-chalk/input-number.css'
 import 'element-ui/lib/theme-chalk/main.css'
 import 'element-ui/lib/theme-chalk/menu.css'
 import 'element-ui/lib/theme-chalk/menu-item.css'
 import 'element-ui/lib/theme-chalk/option.css'
+import 'element-ui/lib/theme-chalk/pagination.css'
 import 'element-ui/lib/theme-chalk/popper.css'
 import 'element-ui/lib/theme-chalk/radio.css'
 import 'element-ui/lib/theme-chalk/radio-group.css'
@@ -79,12 +83,14 @@ import 'element-ui/lib/theme-chalk/message-box.css'
   Form,
   FormItem,
   Header,
+  Image,
   Input,
   InputNumber,
   Main,
   Menu,
   MenuItem,
   Option,
+  Pagination,
   Radio,
   RadioGroup,
   Select,

@@ -87,9 +87,10 @@ export default {
   },
   methods: {
     normalizeTypes(data) {
-      if (Array.isArray(data)) return data
-      if (data && Array.isArray(data.defaultTypes)) return data.defaultTypes
-      return []
+      if (!Array.isArray(data)) return []
+      return data
+        .map((item) => (typeof item === 'string' ? item : item?.value))
+        .filter(Boolean)
     },
     async onOpen() {
       this.loading = true

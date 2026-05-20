@@ -37,8 +37,14 @@
           width="280"
         />
         <el-table-column prop="title" label="问卷标题" show-overflow-tooltip />
-        <el-table-column label="操作" width="200" align="center">
+        <el-table-column label="操作" width="320" align="center">
           <template #default="{ row }">
+            <el-button type="text" @click="onViewAnswers(row)">
+              查看数据
+            </el-button>
+            <el-button type="text" @click="onViewStatistics(row)">
+              查看统计
+            </el-button>
             <el-button
               type="text"
               :disabled="!canEdit"
@@ -101,6 +107,18 @@ export default {
     },
     onCreate() {
       this.$router.push({ name: 'questionnaire-create' })
+    },
+    onViewAnswers(row) {
+      this.$router.push({
+        name: 'questionnaire-answers',
+        params: { questionnaireId: row.questionnaireId }
+      })
+    },
+    onViewStatistics(row) {
+      this.$router.push({
+        name: 'questionnaire-statistics',
+        params: { questionnaireId: row.questionnaireId }
+      })
     },
     onEdit(row) {
       this.$router.push({
