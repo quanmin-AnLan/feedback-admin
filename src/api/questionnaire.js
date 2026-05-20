@@ -26,6 +26,14 @@ export const apiQuestionnaire = {
   // ===== 答卷相关 =====
   listAnswers(questionnaireId, params) {
     return http.get(`/questionnaire/${questionnaireId}/answers`, { params })
+  },
+  /** 获取默认题型配置，data 为 string[] */
+  getDefaultConfig() {
+    return http.get('/questionnaire/defaultConfig')
+  },
+  /** 保存默认题型配置 */
+  updateDefaultConfig(defaultTypes) {
+    return http.put('/questionnaire/defaultConfig', defaultTypes)
   }
 }
 

@@ -3,6 +3,7 @@ import Vue from 'vue'
 import Button from 'element-ui/lib/button'
 import Card from 'element-ui/lib/card'
 import Checkbox from 'element-ui/lib/checkbox'
+import CheckboxGroup from 'element-ui/lib/checkbox-group'
 import Container from 'element-ui/lib/container'
 import Dialog from 'element-ui/lib/dialog'
 import Dropdown from 'element-ui/lib/dropdown'
@@ -68,6 +69,7 @@ import 'element-ui/lib/theme-chalk/message-box.css'
   Button,
   Card,
   Checkbox,
+  CheckboxGroup,
   Container,
   Dialog,
   Dropdown,

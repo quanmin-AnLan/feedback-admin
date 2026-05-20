@@ -3,22 +3,25 @@
     <el-card shadow="never">
       <div slot="header" class="home__header">
         <span class="home__title">问卷列表</span>
-        <el-tooltip
-          :content="`需要 level ≥ ${writeLevel} 的账号`"
-          :disabled="canEdit"
-          placement="bottom"
-        >
-          <span>
-            <el-button
-              type="warning"
-              icon="el-icon-plus"
-              :disabled="!canEdit"
-              @click="onCreate"
-            >
-              新建问卷
-            </el-button>
-          </span>
-        </el-tooltip>
+        <div class="home__actions">
+          <el-button @click="defaultTypesVisible = true">默认问卷</el-button>
+          <el-tooltip
+            :content="`需要 level ≥ ${writeLevel} 的账号`"
+            :disabled="canEdit"
+            placement="bottom"
+          >
+            <span>
+              <el-button
+                type="warning"
+                icon="el-icon-plus"
+                :disabled="!canEdit"
+                @click="onCreate"
+              >
+                新建问卷
+              </el-button>
+            </span>
+          </el-tooltip>
+        </div>
       </div>
 
       <el-table
@@ -55,20 +58,25 @@
         </el-table-column>
       </el-table>
     </el-card>
+
+    <default-types-dialog v-model="defaultTypesVisible" :list="list" />
   </div>
 </template>
 
 <script>
+import DefaultTypesDialog from '@/components/DefaultTypesDialog.vue'
 import questionnaireApi from '@/api/questionnaire'
 import { WRITE_LEVEL } from '@/store/modules/app'
 
 export default {
   name: 'HomeView',
+  components: { DefaultTypesDialog },
   data() {
     return {
       loading: false,
       list: [],
-      writeLevel: WRITE_LEVEL
+      writeLevel: WRITE_LEVEL,
+      defaultTypesVisible: false
     }
   },
   computed: {
@@ -135,6 +143,12 @@ export default {
   font-size: 16px;
   font-weight: 600;
   color: #303133;
+}
+
+.home__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .home__danger {
