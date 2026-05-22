@@ -7,9 +7,39 @@
         </el-button>
         <span class="q-answers__title">{{ pageTitle }}</span>
         <span v-if="total >= 0" class="q-answers__meta">共 {{ total }} 条</span>
+        <el-tooltip
+          :content="`需要 level ≥ ${writeLevel} 的账号`"
+          :disabled="canEdit"
+          placement="top"
+        >
+          <span>
+            <el-button
+              type="danger"
+              size="small"
+              plain
+              :disabled="!canEdit || !selectedRows.length"
+              :loading="deleting"
+              @click="onBatchDelete"
+            >
+              批量删除
+            </el-button>
+          </span>
+        </el-tooltip>
       </div>
 
-      <el-table :data="list" border stripe empty-text="暂无答卷">
+      <el-table
+        ref="answersTable"
+        :data="list"
+        border
+        stripe
+        empty-text="暂无答卷"
+        @selection-change="onSelectionChange"
+      >
+        <el-table-column
+          type="selection"
+          width="48"
+          :selectable="() => canEdit"
+        />
         <el-table-column type="expand" width="48">
           <template #default="{ row }">
             <div class="q-answers__expand">
@@ -54,12 +84,11 @@
           </template>
         </el-table-column>
         <el-table-column prop="answerId" label="答卷 ID" width="220" />
-        <el-table-column
-          prop="submitTime"
-          label="提交时间"
-          width="180"
-          show-overflow-tooltip
-        />
+        <el-table-column label="提交时间" width="180" show-overflow-tooltip>
+          <template #default="{ row }">
+            {{ formatDateTime(row.submitTime) }}
+          </template>
+        </el-table-column>
         <el-table-column
           v-if="!anonymous"
           prop="submitterUuid"
@@ -67,8 +96,19 @@
           min-width="200"
           show-overflow-tooltip
         />
-        <el-table-column prop="ip" label="IP" width="140" show-overflow-tooltip />
-        <el-table-column prop="userAgent" label="UA" width="140" show-overflow-tooltip />
+        <el-table-column prop="userAgent" label="UA" width="200" show-overflow-tooltip />
+        <el-table-column label="操作" width="88" align="center" fixed="right">
+          <template #default="{ row }">
+            <el-button
+              type="text"
+              class="q-answers__danger"
+              :disabled="!canEdit"
+              @click="onDeleteOne(row)"
+            >
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
       </el-table>
 
       <el-pagination
@@ -91,6 +131,8 @@
 import questionnaireApi from '@/api/questionnaire'
 import { QUESTION_TYPES } from '@/components/questionnaire/utils'
 import { formatAnswerValue, parseUploadFiles } from '@/utils/answerFormat'
+import { formatDateTime } from '@/utils/formatDateTime'
+import { WRITE_LEVEL } from '@/store/modules/app'
 
 export default {
   name: 'QuestionnaireAnswers',
@@ -107,10 +149,16 @@ export default {
       total: -1,
       page: 1,
       size: 50,
-      uploadType: QUESTION_TYPES.UPLOAD
+      uploadType: QUESTION_TYPES.UPLOAD,
+      writeLevel: WRITE_LEVEL,
+      selectedRows: [],
+      deleting: false
     }
   },
   computed: {
+    canEdit() {
+      return this.$store.getters['app/canEdit']
+    },
     pageTitle() {
       return this.title
         ? `答卷数据 · ${this.title}`
@@ -121,6 +169,7 @@ export default {
     this.fetchAll()
   },
   methods: {
+    formatDateTime,
     formatAnswer(raw, question) {
       return formatAnswerValue(raw, question)
     },
@@ -179,6 +228,68 @@ export default {
         await this.fetchAnswers()
       } finally {
         this.loading = false
+      }
+    },
+    onSelectionChange(rows) {
+      this.selectedRows = rows || []
+    },
+    clearSelection() {
+      this.selectedRows = []
+      const ref = this.$refs.answersTable
+      if (ref && ref.clearSelection) ref.clearSelection()
+    },
+    confirmDelete(count) {
+      return this.$confirm(`确认删除选中的 ${count} 条答卷？删除后不可恢复。`, '提示', {
+        type: 'warning'
+      })
+    },
+    async onDeleteOne(row) {
+      if (!this.canEdit) {
+        this.$message.warning(`权限不足：需要 level ≥ ${this.writeLevel} 的账号`)
+        return
+      }
+      try {
+        await this.confirmDelete(1)
+      } catch {
+        return
+      }
+      this.deleting = true
+      try {
+        await questionnaireApi.deleteAnswers(this.questionnaireId, [row.answerId])
+        this.$message.success('删除成功')
+        this.clearSelection()
+        await this.fetchAnswers()
+      } catch {
+        // 错误已在 axios 拦截器统一提示
+      } finally {
+        this.deleting = false
+      }
+    },
+    async onBatchDelete() {
+      if (!this.canEdit) {
+        this.$message.warning(`权限不足：需要 level ≥ ${this.writeLevel} 的账号`)
+        return
+      }
+      const ids = this.selectedRows.map((r) => r.answerId).filter(Boolean)
+      if (!ids.length) return
+      try {
+        await this.confirmDelete(ids.length)
+      } catch {
+        return
+      }
+      this.deleting = true
+      try {
+        await questionnaireApi.deleteAnswers(this.questionnaireId, ids)
+        this.$message.success('删除成功')
+        this.clearSelection()
+        if (this.list.length <= ids.length && this.page > 1) {
+          this.page -= 1
+        }
+        await this.fetchAnswers()
+      } catch {
+        // 错误已在 axios 拦截器统一提示
+      } finally {
+        this.deleting = false
       }
     }
   }
@@ -269,5 +380,9 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.q-answers__danger {
+  color: #f56c6c;
 }
 </style>

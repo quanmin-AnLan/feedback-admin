@@ -76,12 +76,11 @@
             empty-text="暂无文本作答"
           >
             <el-table-column prop="text" label="作答内容" min-width="200" />
-            <el-table-column
-              prop="submitTime"
-              label="提交时间"
-              width="180"
-              show-overflow-tooltip
-            />
+            <el-table-column label="提交时间" width="180" show-overflow-tooltip>
+              <template #default="{ row }">
+                {{ formatDateTime(row.submitTime) }}
+              </template>
+            </el-table-column>
           </el-table>
         </div>
       </template>
@@ -91,6 +90,7 @@
 
 <script>
 import questionnaireApi from '@/api/questionnaire'
+import { formatDateTime } from '@/utils/formatDateTime'
 
 export default {
   name: 'QuestionnaireStatistics',
@@ -115,6 +115,7 @@ export default {
     this.fetchStatistics()
   },
   methods: {
+    formatDateTime,
     goBack() {
       this.$router.push({ name: 'home' })
     },

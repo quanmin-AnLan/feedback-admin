@@ -1,14 +1,15 @@
 import { generateUuid } from '@/utils/uuid'
 
 /**
- * 题型枚举（与下游接口约定）：input | textarea | radio | checkbox | upload
+ * 题型枚举（与下游接口约定）：input | textarea | radio | checkbox | upload | date
  */
 export const QUESTION_TYPES = {
   INPUT: 'input',
   TEXTAREA: 'textarea',
   RADIO: 'radio',
   CHECKBOX: 'checkbox',
-  UPLOAD: 'upload'
+  UPLOAD: 'upload',
+  DATE: 'date'
 }
 
 /**
@@ -28,9 +29,10 @@ export const createOption = (label = '') => ({
  * 题目数据结构（与下游约定）：
  *   {
  *     id, title, type, require,
- *     placeholder?, maxLength?, isNum?,        // input / textarea / upload
+ *     placeholder?, maxLength?, isNum?,        // input / textarea / upload / date
  *     options?[],                              // radio / checkbox
  *     relation: { enabled, dependOnQuestionId, showWhenOptionsSelected[] }
+ *     duplicateCheck?: { enabled, fieldLabel }  // 提交时校验是否重复（input/textarea/radio/date）
  *   }
  */
 export const createQuestion = (type) => {
@@ -43,6 +45,10 @@ export const createQuestion = (type) => {
       enabled: false,
       dependOnQuestionId: null,
       showWhenOptionsSelected: []
+    },
+    duplicateCheck: {
+      enabled: false,
+      fieldLabel: ''
     }
   }
 
@@ -74,6 +80,12 @@ export const createQuestion = (type) => {
       uploadLimit: 9
     }
   }
+  if (type === QUESTION_TYPES.DATE) {
+    return {
+      ...base,
+      placeholder: '请选择日期时间'
+    }
+  }
   return base
 }
 
@@ -83,7 +95,8 @@ export const questionTypeLabel = (type) => {
     [QUESTION_TYPES.TEXTAREA]: '多行输入',
     [QUESTION_TYPES.RADIO]: '单选题',
     [QUESTION_TYPES.CHECKBOX]: '多选题',
-    [QUESTION_TYPES.UPLOAD]: '图片上传'
+    [QUESTION_TYPES.UPLOAD]: '图片上传',
+    [QUESTION_TYPES.DATE]: '日期'
   }
   return map[type] || type
 }

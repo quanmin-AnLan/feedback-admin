@@ -1,3 +1,5 @@
+import { formatDateTime, looksLikeIsoDateTime } from '@/utils/formatDateTime'
+
 /**
  * 解析上传题答案为文件列表（farm 提交格式：[{ url, name }]）
  */
@@ -65,6 +67,13 @@ export function formatAnswerValue(raw, question) {
     const files = parseUploadFiles(raw)
     if (!files.length) return '—'
     return files.map((f) => f.name || f.url).join('、')
+  }
+
+  if (type === 'date') {
+    const text = String(raw).trim()
+    if (!text) return '—'
+    if (looksLikeIsoDateTime(text)) return formatDateTime(text)
+    return text
   }
 
   return String(raw).trim() || '—'

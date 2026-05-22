@@ -6,6 +6,7 @@ import http from './http'
  *   - 问卷外层 id 字段：questionnaireId
  *   - 问卷说明字段：description
  *   - 题目结构字段：与 components/questionnaire/utils.js 中 createQuestion 输出对齐
+ *   - 组合必填：groupRequires[]，与 groupRequire.js 约定对齐
  */
 export const apiQuestionnaire = {
   list(params) {
@@ -26,6 +27,13 @@ export const apiQuestionnaire = {
   // ===== 答卷相关 =====
   listAnswers(questionnaireId, params) {
     return http.get(`/questionnaire/${questionnaireId}/answers`, { params })
+  },
+  /** 删除答卷（单条/批量），body: { answerIds: string[] } */
+  deleteAnswers(questionnaireId, answerIds) {
+    return http.post(
+      `/questionnaire/${questionnaireId}/answers/delete`,
+      { answerIds },
+    )
   },
   getStatistics(questionnaireId) {
     return http.get(`/questionnaire/${questionnaireId}/statistics`)

@@ -27,6 +27,7 @@ import Select from 'element-ui/lib/select'
 import Table from 'element-ui/lib/table'
 import TableColumn from 'element-ui/lib/table-column'
 import Tooltip from 'element-ui/lib/tooltip'
+import DatePicker from 'element-ui/lib/date-picker'
 
 import Loading from 'element-ui/lib/loading'
 import Message from 'element-ui/lib/message'
@@ -64,6 +65,9 @@ import 'element-ui/lib/theme-chalk/select-dropdown.css'
 import 'element-ui/lib/theme-chalk/table.css'
 import 'element-ui/lib/theme-chalk/table-column.css'
 import 'element-ui/lib/theme-chalk/tooltip.css'
+import 'element-ui/lib/theme-chalk/date-picker.css'
+import 'element-ui/lib/theme-chalk/time-picker.css'
+import 'element-ui/lib/theme-chalk/time-select.css'
 
 import 'element-ui/lib/theme-chalk/loading.css'
 import 'element-ui/lib/theme-chalk/message.css'
@@ -96,7 +100,8 @@ import 'element-ui/lib/theme-chalk/message-box.css'
   Select,
   Table,
   TableColumn,
-  Tooltip
+  Tooltip,
+  DatePicker
 ].forEach((c) => Vue.use(c))
 
 Vue.use(Loading.directive)

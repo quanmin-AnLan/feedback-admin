@@ -72,6 +72,12 @@
           description="暂无题目，点击左侧按钮添加"
         />
 
+        <group-require-panel
+          v-model="form.groupRequires"
+          :questions="form.questions"
+          :can-edit="canEdit"
+        />
+
         <!-- 提交成功页页面设置 -->
         <div class="q-config__success">
           <div class="q-config__success-title">提交成功页 页面设置</div>
@@ -132,7 +138,13 @@ import CheckboxQuestion from '@/components/questionnaire/CheckboxQuestion.vue'
 import InputQuestion from '@/components/questionnaire/InputQuestion.vue'
 import TextareaQuestion from '@/components/questionnaire/TextareaQuestion.vue'
 import UploadQuestion from '@/components/questionnaire/UploadQuestion.vue'
+import DateQuestion from '@/components/questionnaire/DateQuestion.vue'
+import GroupRequirePanel from '@/components/questionnaire/GroupRequirePanel.vue'
 import { createQuestion, QUESTION_TYPES } from '@/components/questionnaire/utils'
+import {
+  normalizeGroupRequires,
+  pruneGroupRequiresOnQuestionRemove,
+} from '@/components/questionnaire/groupRequire'
 import questionnaireApi from '@/api/questionnaire'
 import { WRITE_LEVEL } from '@/store/modules/app'
 
@@ -141,6 +153,7 @@ const createEmptyForm = () => ({
   description: '',
   anonymous: false,
   questions: [],
+  groupRequires: [],
   success: {
     textMode: 'default',
     customText: '',
@@ -156,7 +169,9 @@ export default {
     CheckboxQuestion,
     InputQuestion,
     TextareaQuestion,
-    UploadQuestion
+    UploadQuestion,
+    DateQuestion,
+    GroupRequirePanel,
   },
   props: {
     // 由路由 props: true 注入，编辑模式下存在
@@ -171,14 +186,16 @@ export default {
         { type: QUESTION_TYPES.CHECKBOX, label: '多选题' },
         { type: QUESTION_TYPES.INPUT, label: '单行输入' },
         { type: QUESTION_TYPES.TEXTAREA, label: '多行输入' },
-        { type: QUESTION_TYPES.UPLOAD, label: '图片上传' }
+        { type: QUESTION_TYPES.UPLOAD, label: '图片上传' },
+        { type: QUESTION_TYPES.DATE, label: '日期' }
       ],
       componentMap: {
         [QUESTION_TYPES.RADIO]: 'RadioQuestion',
         [QUESTION_TYPES.CHECKBOX]: 'CheckboxQuestion',
         [QUESTION_TYPES.INPUT]: 'InputQuestion',
         [QUESTION_TYPES.TEXTAREA]: 'TextareaQuestion',
-        [QUESTION_TYPES.UPLOAD]: 'UploadQuestion'
+        [QUESTION_TYPES.UPLOAD]: 'UploadQuestion',
+        [QUESTION_TYPES.DATE]: 'DateQuestion'
       },
       form: createEmptyForm()
     }
@@ -213,7 +230,13 @@ export default {
             ...(detail && detail.success ? detail.success : {})
           },
           questions:
-            detail && Array.isArray(detail.questions) ? detail.questions : []
+            detail && Array.isArray(detail.questions) ? detail.questions : [],
+          groupRequires: normalizeGroupRequires(
+            detail && detail.groupRequires,
+            detail && Array.isArray(detail.questions)
+              ? detail.questions.map((q) => q.id)
+              : [],
+          ),
         }
       } catch {
         // 错误已在 axios 拦截器统一提示
@@ -248,6 +271,10 @@ export default {
             }
             return q
           })
+          this.form.groupRequires = pruneGroupRequiresOnQuestionRemove(
+            this.form.groupRequires,
+            removed.id,
+          )
         })
         .catch(() => {})
     },
@@ -291,6 +318,10 @@ export default {
       this.submitting = true
       try {
         const payload = JSON.parse(JSON.stringify(this.form))
+        payload.groupRequires = normalizeGroupRequires(
+          payload.groupRequires,
+          payload.questions.map((q) => q.id),
+        )
         if (this.isEdit) {
           await questionnaireApi.update(this.questionnaireId, payload)
           this.$message.success('问卷已更新')

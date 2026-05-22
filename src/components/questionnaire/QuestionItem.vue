@@ -33,6 +33,13 @@
         >
           设为必填
         </el-checkbox>
+        <el-checkbox
+          v-if="canDuplicateCheck"
+          :value="duplicateCheck.enabled"
+          @change="onToggleDuplicateCheck"
+        >
+          校验重复
+        </el-checkbox>
       </div>
       <div class="q-item__footer-right">
         <el-button type="text" @click="$emit('remove')">删除</el-button>
@@ -81,10 +88,23 @@
         />
       </el-select>
     </div>
+
+    <div v-if="canDuplicateCheck && duplicateCheck.enabled" class="q-item__dup">
+      <span class="q-item__dup-label">重复提示字段名</span>
+      <el-input
+        :value="duplicateCheck.fieldLabel"
+        size="small"
+        placeholder="如：手机号、订单号（用于提示文案中的 xx）"
+        class="q-item__dup-input"
+        @input="updateDuplicateCheck('fieldLabel', $event)"
+      />
+    </div>
   </div>
 </template>
 
 <script>
+const DUPLICATE_CHECK_TYPES = ['input', 'textarea', 'radio', 'date']
+
 export default {
   name: 'QuestionItem',
   props: {
@@ -95,6 +115,17 @@ export default {
     titlePlaceholder: { type: String, default: '请输入题目' }
   },
   computed: {
+    canDuplicateCheck() {
+      return DUPLICATE_CHECK_TYPES.includes(this.value.type)
+    },
+    duplicateCheck() {
+      return (
+        this.value.duplicateCheck || {
+          enabled: false,
+          fieldLabel: ''
+        }
+      )
+    },
     relation() {
       return (
         this.value.relation || {
@@ -160,6 +191,23 @@ export default {
           showWhenOptionsSelected: []
         }
       })
+    },
+    updateDuplicateCheck(field, val) {
+      this.$emit('input', {
+        ...this.value,
+        duplicateCheck: { ...this.duplicateCheck, [field]: val }
+      })
+    },
+    onToggleDuplicateCheck(val) {
+      const next = {
+        ...this.duplicateCheck,
+        enabled: val
+      }
+      if (val && !String(next.fieldLabel || '').trim()) {
+        next.fieldLabel = this.value.title || ''
+      }
+      if (!val) next.fieldLabel = ''
+      this.$emit('input', { ...this.value, duplicateCheck: next })
     }
   }
 }
@@ -233,6 +281,27 @@ export default {
 .q-item__link-select--wide {
   flex: 1;
   width: auto;
+  max-width: 360px;
+}
+
+.q-item__dup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #fafafa;
+  border-radius: 4px;
+}
+
+.q-item__dup-label {
+  flex: 0 0 108px;
+  font-size: 12px;
+  color: #606266;
+}
+
+.q-item__dup-input {
+  flex: 1;
   max-width: 360px;
 }
 </style>

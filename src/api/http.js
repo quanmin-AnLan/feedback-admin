@@ -10,7 +10,7 @@ import store from '@/store'
  *     code === 200 才视为成功；剥离 data 外壳返回业务侧
  */
 const http = axios.create({
-  baseURL: process.env.VUE_APP_API_BASE_URL || 'http://api.anlan.xyz',
+  baseURL: process.env.VUE_APP_API_BASE_URL || 'http://api.wnw.icu',
   timeout: 15000
 })
 
