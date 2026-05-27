@@ -298,7 +298,7 @@ export default {
 
 <style scoped>
 .q-answers {
-  max-width: 960px;
+  max-width: 1240px;
   margin: 0 auto;
 }
 

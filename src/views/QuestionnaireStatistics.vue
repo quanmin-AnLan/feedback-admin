@@ -135,7 +135,7 @@ export default {
 
 <style scoped>
 .q-stats {
-  max-width: 960px;
+  max-width: 1240px;
   margin: 0 auto;
 }
 

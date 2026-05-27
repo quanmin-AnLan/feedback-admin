@@ -147,7 +147,7 @@ export default {
 
 <style scoped>
 .home {
-  max-width: 960px;
+  max-width: 1240px;
   margin: 0 auto;
 }
 
