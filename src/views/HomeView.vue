@@ -36,7 +36,13 @@
           label="问卷 ID"
           width="280"
         />
-        <el-table-column prop="title" label="问卷标题" show-overflow-tooltip />
+        <el-table-column prop="title" label="问卷标题" min-width="160" show-overflow-tooltip />
+        <el-table-column
+          prop="answerCount"
+          label="作答人数"
+          width="100"
+          align="center"
+        />
         <el-table-column label="操作" width="320" align="center">
           <template #default="{ row }">
             <el-button type="text" @click="onViewAnswers(row)">

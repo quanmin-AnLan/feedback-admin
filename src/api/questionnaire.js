@@ -7,6 +7,7 @@ import http from './http'
  *   - 问卷说明字段：description
  *   - 题目结构字段：与 components/questionnaire/utils.js 中 createQuestion 输出对齐
  *   - 组合必填：groupRequires[]，与 groupRequire.js 约定对齐
+ *   - 列表项含 answerCount：该问卷答卷条数
  */
 export const apiQuestionnaire = {
   list(params) {
