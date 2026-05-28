@@ -89,14 +89,7 @@
             {{ formatDateTime(row.submitTime) }}
           </template>
         </el-table-column>
-        <el-table-column
-          v-if="!anonymous"
-          prop="submitterUuid"
-          label="提交人 UUID"
-          min-width="200"
-          show-overflow-tooltip
-        />
-        <el-table-column prop="userAgent" label="UA" width="200" show-overflow-tooltip />
+        <el-table-column prop="userAgent" label="UA" show-overflow-tooltip />
         <el-table-column label="操作" width="88" align="center" fixed="right">
           <template #default="{ row }">
             <el-button
