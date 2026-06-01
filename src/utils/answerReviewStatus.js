@@ -17,19 +17,14 @@ const LABEL_MAP = Object.fromEntries(
   ANSWER_REVIEW_STATUS_OPTIONS.map((o) => [o.value, o.label])
 )
 
-const TAG_TYPE_MAP = {
-  [ANSWER_REVIEW_STATUS.PENDING]: 'info',
-  [ANSWER_REVIEW_STATUS.REGISTERED]: '',
-  [ANSWER_REVIEW_STATUS.APPROVED]: 'success',
-  [ANSWER_REVIEW_STATUS.REJECTED]: 'danger'
+/** 状态标签样式 class 后缀，对应 QuestionnaireAnswers 内 scoped 样式 */
+export function answerReviewStatusTagClass(status) {
+  const key = normalizeAnswerReviewStatus(status)
+  return `q-answers__tag--${key}`
 }
 
 export function answerReviewStatusLabel(status) {
   return LABEL_MAP[status] || LABEL_MAP[ANSWER_REVIEW_STATUS.PENDING]
-}
-
-export function answerReviewStatusTagType(status) {
-  return TAG_TYPE_MAP[status] != null ? TAG_TYPE_MAP[status] : 'info'
 }
 
 export function normalizeAnswerReviewStatus(status) {

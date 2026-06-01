@@ -26,6 +26,7 @@ import RadioGroup from 'element-ui/lib/radio-group'
 import Select from 'element-ui/lib/select'
 import Table from 'element-ui/lib/table'
 import TableColumn from 'element-ui/lib/table-column'
+import Tag from 'element-ui/lib/tag'
 import Tooltip from 'element-ui/lib/tooltip'
 import DatePicker from 'element-ui/lib/date-picker'
 
@@ -64,6 +65,7 @@ import 'element-ui/lib/theme-chalk/select.css'
 import 'element-ui/lib/theme-chalk/select-dropdown.css'
 import 'element-ui/lib/theme-chalk/table.css'
 import 'element-ui/lib/theme-chalk/table-column.css'
+import 'element-ui/lib/theme-chalk/tag.css'
 import 'element-ui/lib/theme-chalk/tooltip.css'
 import 'element-ui/lib/theme-chalk/date-picker.css'
 import 'element-ui/lib/theme-chalk/time-picker.css'
@@ -100,6 +102,7 @@ import 'element-ui/lib/theme-chalk/message-box.css'
   Select,
   Table,
   TableColumn,
+  Tag,
   Tooltip,
   DatePicker
 ].forEach((c) => Vue.use(c))

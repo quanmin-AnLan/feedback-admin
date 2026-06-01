@@ -114,7 +114,7 @@
           <template #default="{ row }">
             <el-tag
               size="small"
-              :type="reviewStatusTagType(row.reviewStatus)"
+              :class="reviewStatusTagClass(row.reviewStatus)"
             >
               {{ reviewStatusLabel(row.reviewStatus) }}
             </el-tag>
@@ -215,7 +215,7 @@ import {
   ANSWER_REVIEW_STATUS,
   ANSWER_REVIEW_STATUS_OPTIONS,
   answerReviewStatusLabel,
-  answerReviewStatusTagType,
+  answerReviewStatusTagClass,
   normalizeAnswerReviewStatus
 } from '@/utils/answerReviewStatus'
 import { WRITE_LEVEL } from '@/store/modules/app'
@@ -266,7 +266,7 @@ export default {
   methods: {
     formatDateTime,
     reviewStatusLabel: answerReviewStatusLabel,
-    reviewStatusTagType: answerReviewStatusTagType,
+    reviewStatusTagClass: answerReviewStatusTagClass,
     formatAnswer(raw, question) {
       return formatAnswerValue(raw, question)
     },
@@ -569,5 +569,30 @@ export default {
   font-size: 13px;
   color: #606266;
   word-break: break-all;
+}
+
+/* 答卷状态色：覆盖 el-tag 默认蓝，需穿透组件根节点 */
+::v-deep .el-tag.q-answers__tag--pending {
+  color: #606266;
+  background-color: #f4f4f5;
+  border-color: #dcdfe6;
+}
+
+::v-deep .el-tag.q-answers__tag--registered {
+  color: #409eff;
+  background-color: #ecf5ff;
+  border-color: #d9ecff;
+}
+
+::v-deep .el-tag.q-answers__tag--approved {
+  color: #52c41a;
+  background-color: #f6ffed;
+  border-color: #b7eb8f;
+}
+
+::v-deep .el-tag.q-answers__tag--rejected {
+  color: #f56c6c;
+  background-color: #fef0f0;
+  border-color: #fde2e2;
 }
 </style>
