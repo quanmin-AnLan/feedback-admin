@@ -26,6 +26,9 @@ export const apiQuestionnaire = {
     return http.delete(`/questionnaire/${questionnaireId}`)
   },
   // ===== 答卷相关 =====
+  /**
+   * @param {object} params - page, size；reviewStatus 为多选状态（pending 等），逗号分隔，不传为全部
+   */
   listAnswers(questionnaireId, params) {
     return http.get(`/questionnaire/${questionnaireId}/answers`, { params })
   },
@@ -34,6 +37,13 @@ export const apiQuestionnaire = {
     return http.post(
       `/questionnaire/${questionnaireId}/answers/delete`,
       { answerIds },
+    )
+  },
+  /** 更新单条答卷状态，body: { reviewStatus } */
+  updateAnswerReviewStatus(questionnaireId, answerId, reviewStatus) {
+    return http.put(
+      `/questionnaire/${questionnaireId}/answers/${answerId}/review-status`,
+      { reviewStatus },
     )
   },
   getStatistics(questionnaireId) {

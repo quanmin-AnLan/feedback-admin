@@ -27,6 +27,27 @@
         </el-tooltip>
       </div>
 
+      <div class="q-answers__filters">
+        <span class="q-answers__filter-label">状态筛选</span>
+        <el-select
+          v-model="filterReviewStatuses"
+          multiple
+          collapse-tags
+          clearable
+          size="small"
+          placeholder="全部"
+          class="q-answers__filter-select"
+          @change="onReviewStatusFilterChange"
+        >
+          <el-option
+            v-for="opt in reviewStatusOptions"
+            :key="opt.value"
+            :label="opt.label"
+            :value="opt.value"
+          />
+        </el-select>
+      </div>
+
       <el-table
         ref="answersTable"
         :data="list"
@@ -89,9 +110,26 @@
             {{ formatDateTime(row.submitTime) }}
           </template>
         </el-table-column>
-        <el-table-column prop="userAgent" label="UA" show-overflow-tooltip />
-        <el-table-column label="操作" width="88" align="center" fixed="right">
+        <el-table-column label="状态" width="100" align="center">
           <template #default="{ row }">
+            <el-tag
+              size="small"
+              :type="reviewStatusTagType(row.reviewStatus)"
+            >
+              {{ reviewStatusLabel(row.reviewStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="userAgent" label="UA" show-overflow-tooltip />
+        <el-table-column label="操作" width="148" align="center" fixed="right">
+          <template #default="{ row }">
+            <el-button
+              type="text"
+              :disabled="!canEdit"
+              @click="openStatusDialog(row)"
+            >
+              更新状态
+            </el-button>
             <el-button
               type="text"
               class="q-answers__danger"
@@ -117,6 +155,54 @@
         @size-change="onSizeChange"
       />
     </el-card>
+
+    <el-dialog
+      title="更新答卷状态"
+      :visible.sync="statusDialogVisible"
+      width="400px"
+      append-to-body
+      @closed="onStatusDialogClosed"
+    >
+      <el-form label-width="72px">
+        <el-form-item label="答卷 ID">
+          <span class="q-answers__status-id">{{ statusForm.answerId }}</span>
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-select
+            v-model="statusForm.reviewStatus"
+            placeholder="请选择状态"
+            style="width: 100%"
+            :disabled="!canEdit"
+          >
+            <el-option
+              v-for="opt in reviewStatusOptions"
+              :key="opt.value"
+              :label="opt.label"
+              :value="opt.value"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template slot="footer">
+        <el-button @click="statusDialogVisible = false">取消</el-button>
+        <el-tooltip
+          :content="`需要 level ≥ ${writeLevel} 的账号`"
+          :disabled="canEdit"
+          placement="top"
+        >
+          <span>
+            <el-button
+              type="primary"
+              :loading="statusSaving"
+              :disabled="!canEdit"
+              @click="onSaveStatus"
+            >
+              保存
+            </el-button>
+          </span>
+        </el-tooltip>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -125,6 +211,13 @@ import questionnaireApi from '@/api/questionnaire'
 import { QUESTION_TYPES } from '@/components/questionnaire/utils'
 import { formatAnswerValue, parseUploadFiles } from '@/utils/answerFormat'
 import { formatDateTime } from '@/utils/formatDateTime'
+import {
+  ANSWER_REVIEW_STATUS,
+  ANSWER_REVIEW_STATUS_OPTIONS,
+  answerReviewStatusLabel,
+  answerReviewStatusTagType,
+  normalizeAnswerReviewStatus
+} from '@/utils/answerReviewStatus'
 import { WRITE_LEVEL } from '@/store/modules/app'
 
 export default {
@@ -145,7 +238,16 @@ export default {
       uploadType: QUESTION_TYPES.UPLOAD,
       writeLevel: WRITE_LEVEL,
       selectedRows: [],
-      deleting: false
+      deleting: false,
+      statusDialogVisible: false,
+      statusSaving: false,
+      statusForm: {
+        answerId: '',
+        reviewStatus: ANSWER_REVIEW_STATUS.PENDING
+      },
+      reviewStatusOptions: ANSWER_REVIEW_STATUS_OPTIONS,
+      /** 空数组表示不过滤（全部） */
+      filterReviewStatuses: []
     }
   },
   computed: {
@@ -163,6 +265,8 @@ export default {
   },
   methods: {
     formatDateTime,
+    reviewStatusLabel: answerReviewStatusLabel,
+    reviewStatusTagType: answerReviewStatusTagType,
     formatAnswer(raw, question) {
       return formatAnswerValue(raw, question)
     },
@@ -189,13 +293,37 @@ export default {
         this.loading = false
       }
     },
+    buildAnswersQueryParams() {
+      const params = {
+        page: this.page,
+        size: this.size
+      }
+      if (this.filterReviewStatuses.length) {
+        params.reviewStatus = this.filterReviewStatuses.join(',')
+      }
+      return params
+    },
+    async onReviewStatusFilterChange() {
+      this.page = 1
+      this.clearSelection()
+      this.loading = true
+      try {
+        await this.fetchAnswers()
+      } finally {
+        this.loading = false
+      }
+    },
     async fetchAnswers() {
       try {
-        const res = await questionnaireApi.listAnswers(this.questionnaireId, {
-          page: this.page,
-          size: this.size
-        })
-        this.list = (res && res.list) || []
+        const res = await questionnaireApi.listAnswers(
+          this.questionnaireId,
+          this.buildAnswersQueryParams()
+        )
+        const rawList = (res && res.list) || []
+        this.list = rawList.map((row) => ({
+          ...row,
+          reviewStatus: normalizeAnswerReviewStatus(row.reviewStatus)
+        }))
         this.total = res && res.total != null ? Number(res.total) : 0
         if (res && res.page) this.page = Number(res.page)
         if (res && res.size) this.size = Number(res.size)
@@ -258,6 +386,46 @@ export default {
         this.deleting = false
       }
     },
+    openStatusDialog(row) {
+      if (!this.canEdit) {
+        this.$message.warning(`权限不足：需要 level ≥ ${this.writeLevel} 的账号`)
+        return
+      }
+      this.statusForm = {
+        answerId: row.answerId,
+        reviewStatus: normalizeAnswerReviewStatus(row.reviewStatus)
+      }
+      this.statusDialogVisible = true
+    },
+    onStatusDialogClosed() {
+      this.statusForm = {
+        answerId: '',
+        reviewStatus: ANSWER_REVIEW_STATUS.PENDING
+      }
+    },
+    async onSaveStatus() {
+      if (!this.canEdit) {
+        this.$message.warning(`权限不足：需要 level ≥ ${this.writeLevel} 的账号`)
+        return
+      }
+      const { answerId, reviewStatus } = this.statusForm
+      if (!answerId) return
+      this.statusSaving = true
+      try {
+        await questionnaireApi.updateAnswerReviewStatus(
+          this.questionnaireId,
+          answerId,
+          reviewStatus
+        )
+        this.$message.success('状态已更新')
+        this.statusDialogVisible = false
+        await this.fetchAnswers()
+      } catch {
+        // 错误已在 axios 拦截器统一提示
+      } finally {
+        this.statusSaving = false
+      }
+    },
     async onBatchDelete() {
       if (!this.canEdit) {
         this.$message.warning(`权限不足：需要 level ≥ ${this.writeLevel} 的账号`)
@@ -311,6 +479,24 @@ export default {
 .q-answers__meta {
   font-size: 13px;
   color: #909399;
+}
+
+.q-answers__filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.q-answers__filter-label {
+  flex-shrink: 0;
+  font-size: 13px;
+  color: #606266;
+}
+
+.q-answers__filter-select {
+  width: 320px;
+  max-width: 100%;
 }
 
 .q-answers__pager {
@@ -377,5 +563,11 @@ export default {
 
 .q-answers__danger {
   color: #f56c6c;
+}
+
+.q-answers__status-id {
+  font-size: 13px;
+  color: #606266;
+  word-break: break-all;
 }
 </style>
