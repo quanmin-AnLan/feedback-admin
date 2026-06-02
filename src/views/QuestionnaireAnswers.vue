@@ -184,23 +184,25 @@
         </el-form-item>
       </el-form>
       <template slot="footer">
-        <el-button @click="statusDialogVisible = false">取消</el-button>
-        <el-tooltip
-          :content="`需要 level ≥ ${writeLevel} 的账号`"
-          :disabled="canEdit"
-          placement="top"
-        >
-          <span>
-            <el-button
-              type="primary"
-              :loading="statusSaving"
-              :disabled="!canEdit"
-              @click="onSaveStatus"
-            >
-              保存
-            </el-button>
-          </span>
-        </el-tooltip>
+        <div class="q-answers__status-footer">
+          <el-button @click="statusDialogVisible = false">取消</el-button>
+          <el-tooltip
+            :content="`需要 level ≥ ${writeLevel} 的账号`"
+            :disabled="canEdit"
+            placement="top"
+          >
+            <span>
+              <el-button
+                type="primary"
+                :loading="statusSaving"
+                :disabled="!canEdit"
+                @click="onSaveStatus"
+              >
+                保存
+              </el-button>
+            </span>
+          </el-tooltip>
+        </div>
       </template>
     </el-dialog>
   </div>
@@ -569,6 +571,13 @@ export default {
   font-size: 13px;
   color: #606266;
   word-break: break-all;
+}
+
+.q-answers__status-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
 }
 
 /* 答卷状态色：覆盖 el-tag 默认蓝，需穿透组件根节点 */
