@@ -35,7 +35,7 @@ http.interceptors.response.use(
         return payload.data
       }
       const msg = payload.msg || payload.message || '请求失败'
-      // 401 + uuid 失效 → 清空登录态并弹出登录窗
+      // 401：登录失效 → 清空登录态；403：权限不足 → 仅提示，不登出
       if (payload.code === 401) {
         store.dispatch('app/UpdateUserInfo', {})
         store.dispatch('app/UpdateLoginVisible', true)

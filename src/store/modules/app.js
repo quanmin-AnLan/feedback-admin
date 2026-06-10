@@ -2,7 +2,7 @@
  * 应用级状态：登录态、登录弹窗显隐
  * 设计参考 game-center 项目的 store/modules/app.js
  */
-/** 新建/编辑/删除问卷所需的最低 level */
+/** 写操作（问卷 CRUD、默认问卷、答卷状态/删除）所需的最低 level */
 export const WRITE_LEVEL = 6
 
 const app = {
@@ -17,7 +17,7 @@ const app = {
       state.userInfo && state.userInfo.level != null
         ? Number(state.userInfo.level)
         : 0,
-    // 是否具备问卷写权限（新建 / 编辑 / 删除）
+    // 是否具备写权限（新建/编辑/删除问卷、默认问卷、答卷状态更新与删除）
     canEdit: (_state, getters) => getters.userLevel >= WRITE_LEVEL
   },
   mutations: {

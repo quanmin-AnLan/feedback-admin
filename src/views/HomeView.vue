@@ -4,7 +4,20 @@
       <div slot="header" class="home__header">
         <span class="home__title">问卷列表</span>
         <div class="home__actions">
-          <el-button @click="defaultTypesVisible = true">默认问卷</el-button>
+          <el-tooltip
+            :content="`需要 level ≥ ${writeLevel} 的账号`"
+            :disabled="canEdit"
+            placement="bottom"
+          >
+            <span>
+              <el-button
+                :disabled="!canEdit"
+                @click="defaultTypesVisible = true"
+              >
+                默认问卷
+              </el-button>
+            </span>
+          </el-tooltip>
           <el-tooltip
             :content="`需要 level ≥ ${writeLevel} 的账号`"
             :disabled="canEdit"
