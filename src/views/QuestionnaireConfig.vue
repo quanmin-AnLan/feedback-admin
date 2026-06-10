@@ -128,6 +128,29 @@
         </div>
       </el-card>
     </section>
+
+    <el-dialog
+      title="问卷创建成功"
+      :visible.sync="createSuccessVisible"
+      width="520px"
+      append-to-body
+      :close-on-click-modal="false"
+      @closed="onCreateSuccessClosed"
+    >
+      <p class="q-config__create-tip">问卷已创建，可将以下地址分享给用户填写：</p>
+      <el-input
+        :value="createdQuestionnaireUrl"
+        readonly
+        class="q-config__create-url"
+      >
+        <el-button slot="append" @click="copyQuestionnaireUrl">复制</el-button>
+      </el-input>
+      <template slot="footer">
+        <el-button type="warning" @click="createSuccessVisible = false">
+          知道了
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -197,7 +220,9 @@ export default {
         [QUESTION_TYPES.UPLOAD]: 'UploadQuestion',
         [QUESTION_TYPES.DATE]: 'DateQuestion'
       },
-      form: createEmptyForm()
+      form: createEmptyForm(),
+      createSuccessVisible: false,
+      createdQuestionnaireUrl: ''
     }
   },
   computed: {
@@ -295,6 +320,33 @@ export default {
         }
       })
     },
+    onCreateSuccessClosed() {
+      this.createdQuestionnaireUrl = ''
+      if (this.$route.name !== 'home') {
+        this.$router.push({ name: 'home' })
+      }
+    },
+    async copyQuestionnaireUrl() {
+      const text = this.createdQuestionnaireUrl
+      if (!text) return
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text)
+        } else {
+          const input = document.createElement('textarea')
+          input.value = text
+          input.style.position = 'fixed'
+          input.style.opacity = '0'
+          document.body.appendChild(input)
+          input.select()
+          document.execCommand('copy')
+          document.body.removeChild(input)
+        }
+        this.$message.success('已复制到剪贴板')
+      } catch {
+        this.$message.error('复制失败，请手动复制')
+      }
+    },
     handleCancel() {
       this.$confirm('确认放弃当前配置？', '提示', { type: 'warning' })
         .then(() => {
@@ -325,11 +377,20 @@ export default {
         if (this.isEdit) {
           await questionnaireApi.update(this.questionnaireId, payload)
           this.$message.success('问卷已更新')
+          this.$router.push({ name: 'home' })
         } else {
-          await questionnaireApi.create(payload)
-          this.$message.success('问卷创建成功')
+          const res = await questionnaireApi.create(payload)
+          const id = res && res.questionnaireId
+          this.createdQuestionnaireUrl =
+            (res && res.url) ||
+            (id ? `http://farm.anlan.xyz/feedback/${id}` : '')
+          if (!this.createdQuestionnaireUrl) {
+            this.$message.warning('问卷已创建，但未获取到问卷地址')
+            this.$router.push({ name: 'home' })
+            return
+          }
+          this.createSuccessVisible = true
         }
-        this.$router.push({ name: 'home' })
       } catch {
         // 错误已在 axios 拦截器统一提示
       } finally {
@@ -459,6 +520,17 @@ export default {
   justify-content: center;
   gap: 16px;
   padding: 16px 0;
+}
+
+.q-config__create-tip {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: #606266;
+  line-height: 1.6;
+}
+
+.q-config__create-url {
+  width: 100%;
 }
 
 /* 小屏兼容：屏幕较窄时把侧边栏从 fixed 还原到顶部静态布局 */

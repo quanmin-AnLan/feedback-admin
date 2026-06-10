@@ -73,11 +73,6 @@ const routes = [
     component: () => import('../views/QuestionnaireStatistics.vue'),
     props: true,
     meta: { requiresAuth: true }
-  },
-  {
-    path: '/about',
-    name: 'about',
-    component: () => import('../views/AboutView.vue')
   }
 ]
 
