@@ -120,7 +120,20 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="userAgent" label="UA" show-overflow-tooltip />
+        <el-table-column label="UA" min-width="180">
+          <template #default="{ row }">
+            <el-tooltip
+              v-if="row.userAgent"
+              :content="row.userAgent"
+              placement="top"
+              :enterable="true"
+              popper-class="q-answers__ua-tooltip"
+            >
+              <div class="q-answers__ellipsis">{{ row.userAgent }}</div>
+            </el-tooltip>
+            <span v-else class="q-answers__empty">—</span>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="148" align="center" fixed="right">
           <template #default="{ row }">
             <el-button
@@ -531,6 +544,18 @@ export default {
 
 .q-answers__empty {
   color: #c0c4cc;
+}
+
+.q-answers__ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+::v-deep .q-answers__ua-tooltip {
+  max-width: 480px;
+  line-height: 1.5;
+  word-break: break-all;
 }
 
 .q-answers__uploads {
