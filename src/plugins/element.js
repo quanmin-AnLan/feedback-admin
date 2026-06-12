@@ -1,5 +1,6 @@
 import Vue from 'vue'
 
+import Badge from 'element-ui/lib/badge'
 import Button from 'element-ui/lib/button'
 import Card from 'element-ui/lib/card'
 import Checkbox from 'element-ui/lib/checkbox'
@@ -36,6 +37,7 @@ import MessageBox from 'element-ui/lib/message-box'
 
 import 'element-ui/lib/theme-chalk/base.css'
 import 'element-ui/lib/theme-chalk/icon.css'
+import 'element-ui/lib/theme-chalk/badge.css'
 import 'element-ui/lib/theme-chalk/button.css'
 import 'element-ui/lib/theme-chalk/button-group.css'
 import 'element-ui/lib/theme-chalk/card.css'
@@ -76,6 +78,7 @@ import 'element-ui/lib/theme-chalk/message.css'
 import 'element-ui/lib/theme-chalk/message-box.css'
 
 ;[
+  Badge,
   Button,
   Card,
   Checkbox,

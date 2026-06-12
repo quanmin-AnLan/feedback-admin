@@ -58,27 +58,37 @@
         />
         <el-table-column label="操作" width="320" align="center">
           <template #default="{ row }">
-            <el-button type="text" @click="onViewAnswers(row)">
-              查看数据
-            </el-button>
-            <el-button type="text" @click="onViewStatistics(row)">
-              查看统计
-            </el-button>
-            <el-button
-              type="text"
-              :disabled="!canEdit"
-              @click="onEdit(row)"
-            >
-              编辑
-            </el-button>
-            <el-button
-              type="text"
-              class="home__danger"
-              :disabled="!canEdit"
-              @click="onDelete(row)"
-            >
-              删除
-            </el-button>
+            <div class="home__row-actions">
+              <el-badge
+                :value="row.pendingCount"
+                :max="99"
+                :hidden="!row.pendingCount"
+                class="home__view-badge"
+              >
+                <el-button type="text" class="home__action-btn" @click="onViewAnswers(row)">
+                  查看数据
+                </el-button>
+              </el-badge>
+              <el-button type="text" class="home__action-btn" @click="onViewStatistics(row)">
+                查看统计
+              </el-button>
+              <el-button
+                type="text"
+                class="home__action-btn"
+                :disabled="!canEdit"
+                @click="onEdit(row)"
+              >
+                编辑
+              </el-button>
+              <el-button
+                type="text"
+                class="home__action-btn home__danger"
+                :disabled="!canEdit"
+                @click="onDelete(row)"
+              >
+                删除
+              </el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -190,5 +200,46 @@ export default {
 
 .home__danger {
   color: #f56c6c;
+}
+
+.home__row-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0 4px;
+}
+
+.home__action-btn {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+.home__view-badge {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  overflow: visible;
+}
+
+.home__view-badge .home__action-btn {
+  padding-right: 4px !important;
+}
+
+.home__view-badge ::v-deep .el-badge__content {
+  border: none;
+  top: 8px;
+  right: 8px;
+  height: 14px;
+  line-height: 14px;
+  min-width: 14px;
+  padding: 0 3px;
+  font-size: 10px;
+  transform: translateY(-50%) translateX(100%);
+}
+
+/* 操作列角标需露出单元格，避免顶部被裁切 */
+.home ::v-deep .el-table__body td:last-child .cell {
+  overflow: visible;
 }
 </style>
