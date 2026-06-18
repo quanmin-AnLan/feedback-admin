@@ -104,7 +104,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="answerId" label="答卷 ID" width="220" />
+        <el-table-column prop="answerId" label="答卷 ID" min-width="220" />
         <el-table-column label="提交时间" width="180" show-overflow-tooltip>
           <template #default="{ row }">
             {{ formatDateTime(row.submitTime) }}
@@ -120,21 +120,19 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="UA" min-width="180">
+        <el-table-column label="UA" width="72" align="center">
           <template #default="{ row }">
-            <el-tooltip
+            <el-button
               v-if="row.userAgent"
-              :content="row.userAgent"
-              placement="top"
-              :enterable="true"
-              popper-class="q-answers__ua-tooltip"
+              type="text"
+              @click="openUaDialog(row)"
             >
-              <div class="q-answers__ellipsis">{{ row.userAgent }}</div>
-            </el-tooltip>
+              查看
+            </el-button>
             <span v-else class="q-answers__empty">—</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="148" align="center" fixed="right">
+        <el-table-column label="操作" width="148" align="center">
           <template #default="{ row }">
             <el-button
               type="text"
@@ -218,10 +216,17 @@
         </div>
       </template>
     </el-dialog>
+
+    <user-agent-dialog
+      v-model="uaDialogVisible"
+      :user-agent="uaDialogText"
+      :device-info="uaDialogDeviceInfo"
+    />
   </div>
 </template>
 
 <script>
+import UserAgentDialog from '@/components/UserAgentDialog.vue'
 import questionnaireApi from '@/api/questionnaire'
 import { QUESTION_TYPES } from '@/components/questionnaire/utils'
 import { formatAnswerValue, parseUploadFiles } from '@/utils/answerFormat'
@@ -237,6 +242,7 @@ import { WRITE_LEVEL } from '@/store/modules/app'
 
 export default {
   name: 'QuestionnaireAnswers',
+  components: { UserAgentDialog },
   props: {
     questionnaireId: { type: String, required: true }
   },
@@ -262,7 +268,10 @@ export default {
       },
       reviewStatusOptions: ANSWER_REVIEW_STATUS_OPTIONS,
       /** 空数组表示不过滤（全部） */
-      filterReviewStatuses: []
+      filterReviewStatuses: [],
+      uaDialogVisible: false,
+      uaDialogText: '',
+      uaDialogDeviceInfo: null
     }
   },
   computed: {
@@ -293,6 +302,12 @@ export default {
     },
     goBack() {
       this.$router.push({ name: 'home' })
+    },
+    openUaDialog(row) {
+      if (!row || !row.userAgent) return
+      this.uaDialogText = row.userAgent
+      this.uaDialogDeviceInfo = row.deviceInfo || null
+      this.uaDialogVisible = true
     },
     async fetchAll() {
       this.loading = true
@@ -544,18 +559,6 @@ export default {
 
 .q-answers__empty {
   color: #c0c4cc;
-}
-
-.q-answers__ellipsis {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-::v-deep .q-answers__ua-tooltip {
-  max-width: 480px;
-  line-height: 1.5;
-  word-break: break-all;
 }
 
 .q-answers__uploads {
