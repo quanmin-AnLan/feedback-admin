@@ -8,6 +8,16 @@
     @closed="onClosed"
   >
     <div v-loading="loading" class="default-types-dialog">
+      <p class="default-types-dialog__tip">
+        勾选的问卷会出现在
+        <a
+          :href="defaultQuestionnaireUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="default-types-dialog__link"
+        >默认问卷地址</a>
+        中，用户打开该页面即可选择填写；未勾选的不会显示。
+      </p>
       <el-checkbox-group v-model="selectedTypes" :disabled="!canEdit">
         <el-checkbox
           v-for="opt in list"
@@ -45,6 +55,7 @@
 import questionnaireApi from '@/api/questionnaire'
 import { QUESTION_TYPES, questionTypeLabel } from '@/components/questionnaire/utils'
 import { WRITE_LEVEL } from '@/store/modules/app'
+import { getDefaultQuestionnaireEntryUrl } from '@/utils/questionnaireUrl'
 
 const ALL_TYPES = [
   QUESTION_TYPES.RADIO,
@@ -84,6 +95,9 @@ export default {
     },
     canEdit() {
       return this.$store.getters['app/canEdit']
+    },
+    defaultQuestionnaireUrl() {
+      return getDefaultQuestionnaireEntryUrl()
     }
   },
   methods: {
@@ -133,6 +147,25 @@ export default {
 <style scoped>
 .default-types-dialog {
   min-height: 120px;
+}
+
+.default-types-dialog__tip {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #606266;
+  background: #f4f4f5;
+  border-radius: 4px;
+}
+
+.default-types-dialog__link {
+  color: #409eff;
+  text-decoration: none;
+}
+
+.default-types-dialog__link:hover {
+  text-decoration: underline;
 }
 
 .default-types-dialog__item {

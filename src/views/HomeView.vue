@@ -37,6 +37,11 @@
         </div>
       </div>
 
+      <div class="home__default-url">
+        <span class="home__default-url-label">默认问卷地址：</span>
+        <questionnaire-url-link :url="defaultQuestionnaireUrl" />
+      </div>
+
       <el-table
         v-loading="loading"
         :data="list"
@@ -50,6 +55,11 @@
           width="280"
         />
         <el-table-column prop="title" label="问卷标题" min-width="160" show-overflow-tooltip />
+        <el-table-column label="独立问卷地址" min-width="300">
+          <template #default="{ row }">
+            <questionnaire-url-link :url="questionnaireUrl(row.questionnaireId)" />
+          </template>
+        </el-table-column>
         <el-table-column
           prop="answerCount"
           label="作答人数"
@@ -100,12 +110,17 @@
 
 <script>
 import DefaultTypesDialog from '@/components/DefaultTypesDialog.vue'
+import QuestionnaireUrlLink from '@/components/QuestionnaireUrlLink.vue'
 import questionnaireApi from '@/api/questionnaire'
 import { WRITE_LEVEL } from '@/store/modules/app'
+import {
+  getDefaultQuestionnaireEntryUrl,
+  getIndependentQuestionnaireUrl
+} from '@/utils/questionnaireUrl'
 
 export default {
   name: 'HomeView',
-  components: { DefaultTypesDialog },
+  components: { DefaultTypesDialog, QuestionnaireUrlLink },
   data() {
     return {
       loading: false,
@@ -117,12 +132,18 @@ export default {
   computed: {
     canEdit() {
       return this.$store.getters['app/canEdit']
+    },
+    defaultQuestionnaireUrl() {
+      return getDefaultQuestionnaireEntryUrl()
     }
   },
   created() {
     this.fetchList()
   },
   methods: {
+    questionnaireUrl(questionnaireId) {
+      return getIndependentQuestionnaireUrl(questionnaireId)
+    },
     async fetchList() {
       this.loading = true
       try {
@@ -196,6 +217,19 @@ export default {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.home__default-url {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+
+.home__default-url-label {
+  flex-shrink: 0;
+  color: #606266;
 }
 
 .home__danger {
