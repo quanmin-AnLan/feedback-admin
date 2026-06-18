@@ -14,7 +14,7 @@
                 :disabled="!canEdit"
                 @click="defaultTypesVisible = true"
               >
-                默认问卷
+                默认问卷配置
               </el-button>
             </span>
           </el-tooltip>
